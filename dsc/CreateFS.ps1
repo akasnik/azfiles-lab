@@ -76,8 +76,8 @@ configuration CreateFS
         Script configShare
         {
             SetScript = {
-                cd $using:ShareFolder
-                git clone $using:GitRepo
+                cd $using:ShareFolder 2>&1 | Out-Null
+                git clone $using:GitRepo 2>&1 | Out-Null
             }
             GetScript = {
                 @{Result = Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}}
