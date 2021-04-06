@@ -276,3 +276,24 @@ module hqfsvm './fs.bicep' = {
   ]
 }
 
+module brfsvm './fs.bicep' = {
+  name: 'brfsvm'
+  params: {
+    adminUsername: adminUsername
+    adminPassword: adminPassword
+    vmSize: vmSize
+    artifactsLocation: artifactsLocation
+    artifactsLocationSasToken: artifactsLocationSasToken
+    virtualNetworkName: vnetBranch1.name
+    subnetName: 'SharedServices'
+    domainName: domainName
+    location: locationBranch
+    privateIPAddress: '10.200.0.5'
+    virtualMachineName:'vm-branch1-fs-1'
+    deployShare: false
+  }
+  dependsOn: [
+    hqdcvm
+  ]
+}
+

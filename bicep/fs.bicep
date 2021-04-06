@@ -15,7 +15,7 @@ param vmSize string = 'Standard_D2ds_v4'
 param location string = resourceGroup().location
 
 @description('Virtual machine name.')
-param virtualMachineName string = 'vm-hq-fs-1'
+param virtualMachineName string = 'vm-hq-fs-2'
 
 @description('The name of the virtualNetwork.')
 param virtualNetworkName string
@@ -32,6 +32,8 @@ param artifactsLocation string = 'https://github.com/akasnik/azfiles-lab/raw/mai
 @description('Auto-generated token to access _artifactsLocation. Leave it blank unless you need to provide your own value.')
 @secure()
 param artifactsLocationSasToken string = ''
+
+param deployShare bool = true
 
 var networkInterfaceName = '${virtualMachineName}-nic'
 
@@ -56,7 +58,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-08-01' = {
   }
 }
 
-resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-01' = {
+resource vm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: virtualMachineName
   location: location
   properties: {
@@ -106,8 +108,8 @@ resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-
   }
 }
 
-resource vm_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
-  name: '${virtualMachineName_resource.name}/CreateFileShare'
+resource vm_createFileShare 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
+  name: '${vm.name}/CreateFileShare'
   location: location
   properties: {
     publisher: 'Microsoft.Powershell'
@@ -121,17 +123,21 @@ resource vm_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2020-06
         ShareDriveLetter: 'F'
         ShareFolder: 'F:\\Share1'
         ShareName: 'Share1'
-        GitRepo: 'https://github.com/akasnik/azure-quickstart-templates.git'
+        //GitRepo: 'https://github.com/akasnik/azure-quickstart-templates.git'
+        DeployShare: deployShare
       }
     }
   }
+  dependsOn: [
+    vm_domainJoin
+  ]
 }
 
 resource vm_domainJoin 'Microsoft.Compute/virtualMachines/extensions@2015-06-15' = {
-  name: '${virtualMachineName_resource.name}/joindomain'
+  name: '${vm.name}/joindomain'
   location: location
   dependsOn: [
-    vm_CreateADForest
+    vm
   ]
   properties: {
     publisher: 'Microsoft.Compute'
