@@ -24,7 +24,7 @@ param adminPassword string
 param domainName string = 'contoso.com'
 
 @description('Size of the VM for the controller')
-param vmSize string = 'Standard_D2s_v4'
+param vmSize string = 'Standard_D2ds_v4'
 
 @description('The location of resources, such as templates and DSC modules, that the template depends on')
 param artifactsLocation string = deployment().properties.templateLink.uri
@@ -157,7 +157,7 @@ resource peeringHQBranch 'Microsoft.Network/virtualNetworks/virtualNetworkPeerin
     allowVirtualNetworkAccess: true
     allowForwardedTraffic: true
     allowGatewayTransit: false
-    useRemoteGateways: true
+    useRemoteGateways: false
     remoteVirtualNetwork: {
       id: vnetBranch1.id
     }
@@ -170,7 +170,7 @@ resource peeringBranchHQ 'Microsoft.Network/virtualNetworks/virtualNetworkPeerin
     allowVirtualNetworkAccess: true
     allowForwardedTraffic: true
     allowGatewayTransit: false
-    useRemoteGateways: true
+    useRemoteGateways: false
     remoteVirtualNetwork: {
       id: vnetHQ.id
     }
@@ -218,15 +218,16 @@ resource publicIPAddressName 'Microsoft.Network/publicIPAddresses@2020-08-01' = 
   }
 }
 
-resource bastion 'Microsoft.Network/bastionHosts@2020-08-01' = {
+resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
   name: 'bastion-hq'
   location: locationHQ
   properties: {
     ipConfigurations: [
       {
+        name: 'ipConfig'
         properties:{
           subnet:{
-            id: resourceId('Microsoft.Network virtualNetworks/subnets', vnetHQ.name, 'AzureBastionSubnet')
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetHQ.name, 'AzureBastionSubnet')
           }
           publicIPAddress: {
             id: publicIPAddressName.id
@@ -251,6 +252,27 @@ module hqdcvm './ad-dc.bicep' = {
     domainName: domainName
     location: locationHQ
     privateIPAddress: '10.100.0.4'
+    virtualMachineName: 'vm-hq-dc'
   }
+}
+
+module hqfsvm './fs.bicep' = {
+  name: 'hqfsvm'
+  params: {
+    adminUsername: adminUsername
+    adminPassword: adminPassword
+    vmSize: vmSize
+    artifactsLocation: artifactsLocation
+    artifactsLocationSasToken: artifactsLocationSasToken
+    virtualNetworkName: vnetHQ.name
+    subnetName: 'SharedServices'
+    domainName: domainName
+    location: locationHQ
+    privateIPAddress: '10.100.0.5'
+    virtualMachineName:'vm-hq-fs-1'
+  }
+  dependsOn: [
+    hqdcvm
+  ]
 }
 

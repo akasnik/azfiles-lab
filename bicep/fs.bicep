@@ -15,7 +15,7 @@ param vmSize string = 'Standard_D2ds_v4'
 param location string = resourceGroup().location
 
 @description('Virtual machine name.')
-param virtualMachineName string = 'vm-hq-dc'
+param virtualMachineName string = 'vm-hq-fs-1'
 
 @description('The name of the virtualNetwork.')
 param virtualNetworkName string
@@ -24,7 +24,7 @@ param virtualNetworkName string
 param subnetName string
 
 @description('Private IP address.')
-param privateIPAddress string = '10.100.0.4'
+param privateIPAddress string = '10.100.0.5'
 
 @description('The location of resources, such as DSC modules, that the template depends on')
 param artifactsLocation string = 'https://github.com/akasnik/azfiles-lab/raw/main/dsc/'
@@ -34,6 +34,8 @@ param artifactsLocation string = 'https://github.com/akasnik/azfiles-lab/raw/mai
 param artifactsLocationSasToken string = ''
 
 var networkInterfaceName = '${virtualMachineName}-nic'
+
+var configureFileShareScript = ''
 
 resource nic 'Microsoft.Network/networkInterfaces@2020-08-01' = {
   name: networkInterfaceName
@@ -86,7 +88,7 @@ resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-
           name: '${virtualMachineName}_DataDisk'
           caching: 'ReadWrite'
           createOption: 'Empty'
-          diskSizeGB: 20
+          diskSizeGB: 128
           managedDisk: {
             storageAccountType: 'StandardSSD_LRS'
           }
@@ -104,8 +106,8 @@ resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-
   }
 }
 
-resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
-  name: '${virtualMachineName_resource.name}/CreateADForest'
+resource vm_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
+  name: '${virtualMachineName_resource.name}/CreateFileShare'
   location: location
   properties: {
     publisher: 'Microsoft.Powershell'
@@ -113,23 +115,63 @@ resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/ex
     typeHandlerVersion: '2.19'
     autoUpgradeMinorVersion: true
     settings: {
-      ModulesUrl: uri(artifactsLocation, 'CreateADPDC.zip${artifactsLocationSasToken}')
-      ConfigurationFunction: 'CreateADPDC.ps1\\CreateADPDC'
+      ModulesUrl: uri(artifactsLocation, 'CreateFS.zip${artifactsLocationSasToken}')
+      ConfigurationFunction: 'CreateFS.ps1\\CreateFS'
       Properties: {
-        DomainName: domainName
-        AdminCreds: {
-          UserName: adminUsername
-          Password: 'PrivateSettingsRef:AdminPassword'
-        }
-      }
-    }
-    protectedSettings: {
-      Items: {
-        AdminPassword: adminPassword
+        ShareDriveLetter: 'F'
+        ShareFolder: 'F:\\Share1'
+        ShareName: 'Share1'
+        GitRepo: 'https://github.com/akasnik/azure-quickstart-templates.git'
       }
     }
   }
 }
 
+resource vm_domainJoin 'Microsoft.Compute/virtualMachines/extensions@2015-06-15' = {
+  name: '${virtualMachineName_resource.name}/joindomain'
+  location: location
+  dependsOn: [
+    vm_CreateADForest
+  ]
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'JsonADDomainExtension'
+    typeHandlerVersion: '1.3'
+    autoUpgradeMinorVersion: true
+    settings: {
+      Name: domainName
+      //OUPath: ouPath
+      User: '${adminUsername}@${domainName}'
+      Restart: true
+      //Options: 3
+    }
+    protectedSettings: {
+      Password: adminPassword
+    }
+  }
+}
+
+/*
+resource vm_configshare 'Microsoft.Compute/virtualMachines/extensions@2018-06-01' = {
+  name: '${virtualMachineName_resource.name}/config-fileshare'
+  location: location
+  dependsOn: [
+    vm_domainJoin
+  ]
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.10'
+    autoUpgradeMinorVersion: true
+    settings: {
+      timestamp: 123456789
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe ${configureFileShareScript}'
+    }
+  }
+}
+*/
+
+
 output dnsIpAddress string = privateIPAddress
-output domainName string = domainName
