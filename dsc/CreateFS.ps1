@@ -83,7 +83,7 @@ configuration CreateFS
                 @{Result = Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}}
             }
             TestScript = {
-                @{Result = ((Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}) -gt 0)}
+                ((Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}) -gt 0)
             }
             DependsOn = "[cChocoPackageInstaller]installGit"
         }
