@@ -33,8 +33,6 @@ param artifactsLocation string = 'https://github.com/akasnik/azfiles-lab/raw/mai
 @secure()
 param artifactsLocationSasToken string = ''
 
-param deployShare bool = true
-
 var networkInterfaceName = '${virtualMachineName}-nic'
 
 var configureFileShareScript = ''
@@ -121,10 +119,6 @@ resource vm_configAppServer 'Microsoft.Compute/virtualMachines/extensions@2020-0
       ConfigurationFunction: 'ConfigAppServer.ps1\\ConfigAppServer'
       Properties: {
         ShareDriveLetter: 'F'
-        ShareFolder: 'F:\\Share1'
-        ShareName: 'Share1'
-        //GitRepo: 'https://github.com/akasnik/azure-quickstart-templates.git'
-        DeployShare: deployShare
       }
     }
   }

@@ -1492,10 +1492,6 @@
               "metadata": {
                 "description": "Auto-generated token to access _artifactsLocation. Leave it blank unless you need to provide your own value."
               }
-            },
-            "deployShare": {
-              "type": "bool",
-              "defaultValue": true
             }
           },
           "functions": [],
@@ -1592,10 +1588,7 @@
                   "ModulesUrl": "[uri(parameters('artifactsLocation'), format('ConfigAppServer.zip{0}', parameters('artifactsLocationSasToken')))]",
                   "ConfigurationFunction": "ConfigAppServer.ps1\\ConfigAppServer",
                   "Properties": {
-                    "ShareDriveLetter": "F",
-                    "ShareFolder": "F:\\Share1",
-                    "ShareName": "Share1",
-                    "DeployShare": "[parameters('deployShare')]"
+                    "ShareDriveLetter": "F"
                   }
                 }
               },
@@ -1647,7 +1640,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.3.126.58533",
-      "templateHash": "18197377682381628340"
+      "templateHash": "6280764462079471288"
     }
   }
 }
