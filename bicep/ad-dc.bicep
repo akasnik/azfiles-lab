@@ -26,6 +26,9 @@ param subnetName string
 @description('Private IP address.')
 param privateIPAddress string = '10.100.0.4'
 
+@description('Use Azure DNS on NIC config.')
+param useAzureDNS bool = true
+
 @description('The location of resources, such as DSC modules, that the template depends on')
 param artifactsLocation string = 'https://github.com/akasnik/azfiles-lab/raw/main/dsc/'
 
@@ -51,6 +54,11 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-08-01' = {
         }
       }
     ]
+    dnsSettings:{
+      dnsServers:[
+        '168.63.129.16'
+      ]
+    }
   }
 }
 

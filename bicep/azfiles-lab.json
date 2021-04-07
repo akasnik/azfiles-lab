@@ -95,33 +95,7 @@
   },
   "functions": [],
   "variables": {
-    "dnsPrivateIp": "10.100.0.4",
-    "vnetHQsubnets": [
-      {
-        "name": "SharedServices",
-        "properties": {
-          "addressPrefix": "10.100.0.0/24"
-        }
-      },
-      {
-        "name": "Client",
-        "properties": {
-          "addressPrefix": "10.100.10.0/24"
-        }
-      },
-      {
-        "name": "AzureBastionSubnet",
-        "properties": {
-          "addressPrefix": "10.100.254.0/24"
-        }
-      },
-      {
-        "name": "GatewaySubnet",
-        "properties": {
-          "addressPrefix": "10.100.255.0/24"
-        }
-      }
-    ]
+    "dnsPrivateIp": "10.100.0.4"
   },
   "resources": [
     {
@@ -179,7 +153,37 @@
             "10.100.0.0/16"
           ]
         },
-        "subnets": "[variables('vnetHQsubnets')]"
+        "dhcpOptions": {
+          "dnsServers": [
+            "[variables('dnsPrivateIp')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "SharedServices",
+            "properties": {
+              "addressPrefix": "10.100.0.0/24"
+            }
+          },
+          {
+            "name": "Client",
+            "properties": {
+              "addressPrefix": "10.100.10.0/24"
+            }
+          },
+          {
+            "name": "AzureBastionSubnet",
+            "properties": {
+              "addressPrefix": "10.100.254.0/24"
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "10.100.255.0/24"
+            }
+          }
+        ]
       }
     },
     {
@@ -338,80 +342,6 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2019-10-01",
-      "name": "[format('{0}-Update', parameters('vnetHQName'))]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "dnsPrivateIp": {
-            "value": "[variables('dnsPrivateIp')]"
-          },
-          "ipAddressRange": {
-            "value": "10.100.0.0/16"
-          },
-          "subnets": {
-            "value": "[variables('vnetHQsubnets')]"
-          },
-          "vnetName": {
-            "value": "[parameters('vnetHQName')]"
-          },
-          "location": {
-            "value": "[parameters('locationHQ')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {
-            "vnetName": {
-              "type": "string"
-            },
-            "location": {
-              "type": "string"
-            },
-            "dnsPrivateIp": {
-              "type": "string"
-            },
-            "subnets": {
-              "type": "array"
-            },
-            "ipAddressRange": {
-              "type": "string"
-            }
-          },
-          "functions": [],
-          "resources": [
-            {
-              "type": "Microsoft.Network/virtualNetworks",
-              "apiVersion": "2020-08-01",
-              "name": "[parameters('vnetName')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "addressSpace": {
-                  "addressPrefixes": [
-                    "[parameters('ipAddressRange')]"
-                  ]
-                },
-                "dhcpOptions": {
-                  "dnsServers": [
-                    "[parameters('dnsPrivateIp')]"
-                  ]
-                },
-                "subnets": "[parameters('subnets')]"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'hqdcvm')]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-10-01",
       "name": "hqdcvm",
       "properties": {
         "expressionEvaluationOptions": {
@@ -515,6 +445,13 @@
                 "description": "Private IP address."
               }
             },
+            "useAzureDNS": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Use Azure DNS on NIC config."
+              }
+            },
             "artifactsLocation": {
               "type": "string",
               "defaultValue": "https://github.com/akasnik/azfiles-lab/raw/main/dsc/",
@@ -552,7 +489,12 @@
                       }
                     }
                   }
-                ]
+                ],
+                "dnsSettings": {
+                  "dnsServers": [
+                    "168.63.129.16"
+                  ]
+                }
               }
             },
             {
@@ -900,7 +842,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "Name": "[parameters('domainName')]",
-                  "User": "[parameters('adminUsername')]",
+                  "User": "[format('{0}@{1}', parameters('adminUsername'), parameters('domainName'))]",
                   "Restart": true,
                   "Options": 3
                 },
@@ -923,8 +865,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'hqdcvm')]",
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetHQName'))]",
-        "[resourceId('Microsoft.Resources/deployments', format('{0}-Update', parameters('vnetHQName')))]"
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetHQName'))]"
       ]
     },
     {
@@ -1173,7 +1114,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "Name": "[parameters('domainName')]",
-                  "User": "[parameters('adminUsername')]",
+                  "User": "[format('{0}@{1}', parameters('adminUsername'), parameters('domainName'))]",
                   "Restart": true,
                   "Options": 3
                 },
@@ -1196,8 +1137,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'hqdcvm')]",
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetBranchName'))]",
-        "[resourceId('Microsoft.Resources/deployments', format('{0}-Update', parameters('vnetHQName')))]"
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetBranchName'))]"
       ]
     }
   ],
@@ -1205,7 +1145,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.3.126.58533",
-      "templateHash": "3053658176005009906"
+      "templateHash": "4409470508144670744"
     }
   }
 }

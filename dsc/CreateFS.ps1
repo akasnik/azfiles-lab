@@ -46,6 +46,36 @@ configuration CreateFS
             DependsOn = "[xWaitForDisk]Disk2"
         }
 
+        cChocoInstaller installChoco
+        {
+            InstallDir = "c:\choco"
+            DependsOn = "[xDisk]DataDisk"
+        }
+        
+        cChocoPackageInstaller installGit
+        {
+            Name        = "git"
+            DependsOn   = "[cChocoInstaller]installChoco"
+            #This will automatically try to upgrade if available, only if a version is not explicitly specified.
+            AutoUpgrade = $True
+        }
+
+        cChocoPackageInstaller installAzCLI
+        {
+            Name        = "azure-cli"
+            DependsOn   = "[cChocoPackageInstaller]installGit"
+            #This will automatically try to upgrade if available, only if a version is not explicitly specified.
+            AutoUpgrade = $True
+        }
+        
+        cChocoPackageInstaller installEdge
+        {
+            Name        = "choco install microsoft-edge"
+            DependsOn   = "[cChocoPackageInstaller]installAzCLI"
+            #This will automatically try to upgrade if available, only if a version is not explicitly specified.
+            AutoUpgrade = $True
+        }
+
         if ($DeployShare) {
             File ShareFolder {
                 Ensure = "Present"
@@ -59,40 +89,10 @@ configuration CreateFS
                 Path = $ShareFolder
                 DependsOn = "[File]ShareFolder"
             }
-
-            cChocoInstaller installChoco
-            {
-                InstallDir = "c:\choco"
-                DependsOn = "[SmbShare]Share1"
-            }
-            
-            cChocoPackageInstaller installGit
-            {
-                Name        = "git"
-                DependsOn   = "[cChocoInstaller]installChoco"
-                #This will automatically try to upgrade if available, only if a version is not explicitly specified.
-                AutoUpgrade = $True
-            }
-
-            cChocoPackageInstaller installAzCLI
-            {
-                Name        = "azure-cli"
-                DependsOn   = "[cChocoPackageInstaller]installGit"
-                #This will automatically try to upgrade if available, only if a version is not explicitly specified.
-                AutoUpgrade = $True
-            }
-            
-            cChocoPackageInstaller installEdge
-            {
-                Name        = "choco install microsoft-edge"
-                DependsOn   = "[cChocoPackageInstaller]installAzCLI"
-                #This will automatically try to upgrade if available, only if a version is not explicitly specified.
-                AutoUpgrade = $True
-            }
             
             Script configShare
             {
-                DependsOn = "[cChocoPackageInstaller]installEdge"
+                DependsOn = @('[cChocoPackageInstaller]installGit', '[File]ShareFolder')
                 SetScript = {
                     #git -C $using:ShareFolder clone $using:GitRepo | Out-Null
                     $out = Invoke-Command -ScriptBlock {git -C $using:ShareFolder clone $using:GitRepo 2>&1}
