@@ -18,7 +18,7 @@ param adminUsername string = 'azadmin'
 
 @description('The password for the administrator account of the new VM and domain')
 @secure()
-param adminPassword string 
+param adminPassword string
 
 @description('The FQDN of the Active Directory Domain to be created')
 param domainName string = 'contoso.com'
@@ -34,6 +34,33 @@ param artifactsLocation string = deployment().properties.templateLink.uri
 param artifactsLocationSasToken string = ''
 
 var dnsPrivateIp = '10.100.0.4'
+var vnetHQIPaddressRange = '10.100.0.0/16'
+var vnetHQsubnets = [
+  {
+    name: 'SharedServices'
+    properties: {
+      addressPrefix: '10.100.0.0/24'
+    }
+  }
+  {
+    name: 'Client'
+    properties: {
+      addressPrefix: '10.100.10.0/24'
+    }
+  }
+  {
+    name: 'AzureBastionSubnet'
+    properties: {
+      addressPrefix: '10.100.254.0/24'
+    }
+  }
+  {
+    name: 'GatewaySubnet'
+    properties: {
+      addressPrefix: '10.100.255.0/24'
+    }
+  }
+]
 
 // Deploy AZ Hub VNet
 resource vnetAzHub 'Microsoft.Network/virtualNetworks@2020-08-01' = {
@@ -45,8 +72,8 @@ resource vnetAzHub 'Microsoft.Network/virtualNetworks@2020-08-01' = {
         '192.168.0.0/16'
       ]
     }
-    dhcpOptions:{
-      dnsServers:[
+    dhcpOptions: {
+      dnsServers: [
         dnsPrivateIp
       ]
     }
@@ -62,7 +89,7 @@ resource vnetAzHub 'Microsoft.Network/virtualNetworks@2020-08-01' = {
         properties: {
           addressPrefix: '192.168.10.0/24'
         }
-      }      
+      }
       {
         name: 'AzureBastionSubnet'
         properties: {
@@ -86,41 +113,25 @@ resource vnetHQ 'Microsoft.Network/virtualNetworks@2020-08-01' = {
   properties: {
     addressSpace: {
       addressPrefixes: [
-        '10.100.0.0/16'
+        vnetHQIPaddressRange
       ]
     }
-    dhcpOptions:{
-      dnsServers:[
-        dnsPrivateIp
-      ]
-    }
-    subnets: [
-      {
-        name: 'SharedServices'
-        properties: {
-          addressPrefix: '10.100.0.0/24'
-        }
-      }
-      {
-        name: 'Client'
-        properties: {
-          addressPrefix: '10.100.10.0/24'
-        }
-      }      
-      {
-        name: 'AzureBastionSubnet'
-        properties: {
-          addressPrefix: '10.100.254.0/24'
-        }
-      }
-      {
-        name: 'GatewaySubnet'
-        properties: {
-          addressPrefix: '10.100.255.0/24'
-        }
-      }
-    ]
+    subnets: vnetHQsubnets
   }
+}
+
+module vnetHQUpdateDNS './vnet.bicep' = {
+  name: '${vnetHQName}-Update'
+  params: {
+    dnsPrivateIp: dnsPrivateIp
+    ipAddressRange: vnetHQIPaddressRange
+    subnets: vnetHQsubnets
+    vnetName: vnetHQName
+    location: locationHQ
+  }
+  dependsOn: [
+    hqdcvm
+  ]
 }
 
 // Deploy Branch 1 VNet
@@ -133,8 +144,8 @@ resource vnetBranch1 'Microsoft.Network/virtualNetworks@2020-08-01' = {
         '10.200.0.0/16'
       ]
     }
-    dhcpOptions:{
-      dnsServers:[
+    dhcpOptions: {
+      dnsServers: [
         dnsPrivateIp
       ]
     }
@@ -150,7 +161,7 @@ resource vnetBranch1 'Microsoft.Network/virtualNetworks@2020-08-01' = {
         properties: {
           addressPrefix: '10.200.10.0/24'
         }
-      }      
+      }
       {
         name: 'AzureBastionSubnet'
         properties: {
@@ -242,8 +253,8 @@ resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
     ipConfigurations: [
       {
         name: 'ipConfig'
-        properties:{
-          subnet:{
+        properties: {
+          subnet: {
             id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetHQ.name, 'AzureBastionSubnet')
           }
           publicIPAddress: {
@@ -286,10 +297,11 @@ module hqfsvm './fs.bicep' = {
     domainName: domainName
     location: locationHQ
     privateIPAddress: '10.100.0.5'
-    virtualMachineName:'vm-hq-fs-1'
+    virtualMachineName: 'vm-hq-fs-1'
   }
   dependsOn: [
     hqdcvm
+    vnetHQUpdateDNS
   ]
 }
 
@@ -306,11 +318,11 @@ module brfsvm './fs.bicep' = {
     domainName: domainName
     location: locationBranch
     privateIPAddress: '10.200.0.5'
-    virtualMachineName:'vm-branch1-fs-1'
+    virtualMachineName: 'vm-branch1-fs-1'
     deployShare: false
   }
   dependsOn: [
     hqdcvm
+    vnetHQUpdateDNS
   ]
 }
-
