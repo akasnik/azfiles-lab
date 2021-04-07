@@ -61,7 +61,7 @@ configuration CreateADPDC
         xDnsServerForwarder DnsForwarder
         {
             IsSingleInstance = 'Yes'
-            IPAddresses = '168.63. 129.16'
+            IPAddresses = '168.63.129.16'
         }
 
         xWaitforDisk Disk2

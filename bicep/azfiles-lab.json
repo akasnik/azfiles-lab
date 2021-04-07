@@ -94,6 +94,9 @@
     }
   },
   "functions": [],
+  "variables": {
+    "dnsPrivateIp": "10.100.0.4"
+  },
   "resources": [
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -104,6 +107,11 @@
         "addressSpace": {
           "addressPrefixes": [
             "192.168.0.0/16"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": [
+            "[variables('dnsPrivateIp')]"
           ]
         },
         "subnets": [
@@ -145,6 +153,11 @@
             "10.100.0.0/16"
           ]
         },
+        "dhcpOptions": {
+          "dnsServers": [
+            "[variables('dnsPrivateIp')]"
+          ]
+        },
         "subnets": [
           {
             "name": "SharedServices",
@@ -182,6 +195,11 @@
         "addressSpace": {
           "addressPrefixes": [
             "10.200.0.0/16"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": [
+            "[variables('dnsPrivateIp')]"
           ]
         },
         "subnets": [
@@ -359,7 +377,7 @@
             "value": "[parameters('locationHQ')]"
           },
           "privateIPAddress": {
-            "value": "10.100.0.4"
+            "value": "[variables('dnsPrivateIp')]"
           },
           "virtualMachineName": {
             "value": "vm-hq-dc"
@@ -1113,7 +1131,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.3.126.58533",
-      "templateHash": "4516038869871682433"
+      "templateHash": "12786719166851394359"
     }
   }
 }
