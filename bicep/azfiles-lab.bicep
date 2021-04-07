@@ -23,8 +23,11 @@ param adminPassword string
 @description('The FQDN of the Active Directory Domain to be created')
 param domainName string = 'contoso.com'
 
-@description('Size of the VM for the controller')
+@description('Size of the VM for the servers')
 param vmSize string = 'Standard_D2ds_v4'
+
+@description('Size of the VM for the clients')
+param vmSizeClient string = 'Standard_B2ms'
 
 @description('The location of resources, such as templates and DSC modules, that the template depends on')
 param artifactsLocation string = deployment().properties.templateLink.uri
@@ -308,6 +311,26 @@ module brfsvm './fs.bicep' = {
     privateIPAddress: '10.200.0.5'
     virtualMachineName:'vm-branch1-fs-1'
     deployShare: false
+  }
+  dependsOn: [
+    hqdcvm
+  ]
+}
+
+module hqclivm './client.bicep' = {
+  name: 'hqclivm'
+  params: {
+    adminUsername: adminUsername
+    adminPassword: adminPassword
+    vmSize: vmSizeClient
+    artifactsLocation: artifactsLocation
+    artifactsLocationSasToken: artifactsLocationSasToken
+    virtualNetworkName: vnetHQ.name
+    subnetName: 'Client'
+    domainName: domainName
+    location: locationHQ
+    privateIPAddress: '10.100.10.4'
+    virtualMachineName:'vm-hq-client-1'
   }
   dependsOn: [
     hqdcvm
