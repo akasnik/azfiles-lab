@@ -337,3 +337,23 @@ module hqclivm './client.bicep' = {
   ]
 }
 
+// Add Application server in Azure hub
+module azappvm './appserver.bicep' = {
+  name: 'azappvm'
+  params: {
+    adminUsername: adminUsername
+    adminPassword: adminPassword
+    vmSize: vmSize
+    artifactsLocation: artifactsLocation
+    artifactsLocationSasToken: artifactsLocationSasToken
+    virtualNetworkName: vnetAzHub.name
+    subnetName: 'SharedServices'
+    domainName: domainName
+    location: locationAZHub
+    privateIPAddress: '192.168.0.5'
+    virtualMachineName:'vm-az-app-1'
+  }
+  dependsOn: [
+    hqdcvm
+  ]
+}

@@ -1372,13 +1372,282 @@
         "[resourceId('Microsoft.Resources/deployments', 'hqdcvm')]",
         "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetHQName'))]"
       ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "azappvm",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "vmSize": {
+            "value": "[parameters('vmSize')]"
+          },
+          "artifactsLocation": {
+            "value": "[parameters('artifactsLocation')]"
+          },
+          "artifactsLocationSasToken": {
+            "value": "[parameters('artifactsLocationSasToken')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('vnetAZHubName')]"
+          },
+          "subnetName": {
+            "value": "SharedServices"
+          },
+          "domainName": {
+            "value": "[parameters('domainName')]"
+          },
+          "location": {
+            "value": "[parameters('locationAZHub')]"
+          },
+          "privateIPAddress": {
+            "value": "192.168.0.5"
+          },
+          "virtualMachineName": {
+            "value": "vm-az-app-1"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "adminUsername": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the administrator account of the new VM and domain"
+              }
+            },
+            "adminPassword": {
+              "type": "secureString",
+              "metadata": {
+                "description": "The password for the administrator account of the new VM and domain"
+              }
+            },
+            "domainName": {
+              "type": "string",
+              "metadata": {
+                "description": "The FQDN of the Active Directory Domain to be created"
+              }
+            },
+            "vmSize": {
+              "type": "string",
+              "defaultValue": "Standard_D2ds_v4",
+              "metadata": {
+                "description": "Size of the VM for the controller"
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location for all resources."
+              }
+            },
+            "virtualMachineName": {
+              "type": "string",
+              "defaultValue": "vm-az-app-1",
+              "metadata": {
+                "description": "Virtual machine name."
+              }
+            },
+            "virtualNetworkName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the virtualNetwork."
+              }
+            },
+            "subnetName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the subnet."
+              }
+            },
+            "privateIPAddress": {
+              "type": "string",
+              "defaultValue": "192.168.0.5",
+              "metadata": {
+                "description": "Private IP address."
+              }
+            },
+            "artifactsLocation": {
+              "type": "string",
+              "defaultValue": "https://github.com/akasnik/azfiles-lab/raw/main/dsc/",
+              "metadata": {
+                "description": "The location of resources, such as DSC modules, that the template depends on"
+              }
+            },
+            "artifactsLocationSasToken": {
+              "type": "secureString",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Auto-generated token to access _artifactsLocation. Leave it blank unless you need to provide your own value."
+              }
+            },
+            "deployShare": {
+              "type": "bool",
+              "defaultValue": true
+            }
+          },
+          "functions": [],
+          "variables": {
+            "networkInterfaceName": "[format('{0}-nic', parameters('virtualMachineName'))]",
+            "configureFileShareScript": ""
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-08-01",
+              "name": "[variables('networkInterfaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('privateIPAddress')]",
+                      "subnet": {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2020-12-01",
+              "name": "[parameters('virtualMachineName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                  "computerName": "[parameters('virtualMachineName')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2016-Datacenter",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "name": "[format('{0}_OSDisk', parameters('virtualMachineName'))]",
+                    "caching": "ReadOnly",
+                    "createOption": "FromImage",
+                    "managedDisk": {
+                      "storageAccountType": "StandardSSD_LRS"
+                    }
+                  },
+                  "dataDisks": [
+                    {
+                      "name": "[format('{0}_DataDisk', parameters('virtualMachineName'))]",
+                      "caching": "ReadWrite",
+                      "createOption": "Empty",
+                      "diskSizeGB": 128,
+                      "managedDisk": {
+                        "storageAccountType": "StandardSSD_LRS"
+                      },
+                      "lun": 0
+                    }
+                  ]
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/ConfigAppServer', parameters('virtualMachineName'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.19",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "ModulesUrl": "[uri(parameters('artifactsLocation'), format('ConfigAppServer.zip{0}', parameters('artifactsLocationSasToken')))]",
+                  "ConfigurationFunction": "ConfigAppServer.ps1\\ConfigAppServer",
+                  "Properties": {
+                    "ShareDriveLetter": "F",
+                    "ShareFolder": "F:\\Share1",
+                    "ShareName": "Share1",
+                    "DeployShare": "[parameters('deployShare')]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/joindomain', parameters('virtualMachineName')), '/')[0], split(format('{0}/joindomain', parameters('virtualMachineName')), '/')[1])]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2015-06-15",
+              "name": "[format('{0}/joindomain', parameters('virtualMachineName'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "Name": "[parameters('domainName')]",
+                  "User": "[format('{0}@{1}', parameters('adminUsername'), parameters('domainName'))]",
+                  "Restart": true,
+                  "Options": 3
+                },
+                "protectedSettings": {
+                  "Password": "[parameters('adminPassword')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "dnsIpAddress": {
+              "type": "string",
+              "value": "[parameters('privateIPAddress')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'hqdcvm')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetAZHubName'))]"
+      ]
     }
   ],
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.3.126.58533",
-      "templateHash": "5753880136803085409"
+      "templateHash": "18197377682381628340"
     }
   }
 }
