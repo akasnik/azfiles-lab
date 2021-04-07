@@ -73,10 +73,26 @@ configuration CreateFS
                 #This will automatically try to upgrade if available, only if a version is not explicitly specified.
                 AutoUpgrade = $True
             }
+
+            cChocoPackageInstaller installAzCLI
+            {
+                Name        = "azure-cli"
+                DependsOn   = "[cChocoPackageInstaller]installGit"
+                #This will automatically try to upgrade if available, only if a version is not explicitly specified.
+                AutoUpgrade = $True
+            }
+            
+            cChocoPackageInstaller installEdge
+            {
+                Name        = "choco install microsoft-edge"
+                DependsOn   = "[cChocoPackageInstaller]installAzCLI"
+                #This will automatically try to upgrade if available, only if a version is not explicitly specified.
+                AutoUpgrade = $True
+            }
             
             Script configShare
             {
-                DependsOn = "[cChocoPackageInstaller]installGit"
+                DependsOn = "[cChocoPackageInstaller]installEdge"
                 SetScript = {
                     if (Test-Path $using:ShareFolder)
                     {
@@ -87,7 +103,7 @@ configuration CreateFS
                         Start-Sleep -s 60
                         if (Test-Path $using:ShareFolder)
                         {
-                            git clone -C $using:ShareFolder $using:GitRepo | Out-Null
+                            git -C $using:ShareFolder clone $using:GitRepo | Out-Null
                         }
                         else
                         {
