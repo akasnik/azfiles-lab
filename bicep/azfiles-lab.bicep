@@ -33,6 +33,8 @@ param artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param artifactsLocationSasToken string = ''
 
+var dnsPrivateIp = '10.100.0.4'
+
 // Deploy AZ Hub VNet
 resource vnetAzHub 'Microsoft.Network/virtualNetworks@2020-08-01' = {
   name: vnetAZHubName
@@ -41,6 +43,11 @@ resource vnetAzHub 'Microsoft.Network/virtualNetworks@2020-08-01' = {
     addressSpace: {
       addressPrefixes: [
         '192.168.0.0/16'
+      ]
+    }
+    dhcpOptions:{
+      dnsServers:[
+        dnsPrivateIp
       ]
     }
     subnets: [
@@ -82,6 +89,11 @@ resource vnetHQ 'Microsoft.Network/virtualNetworks@2020-08-01' = {
         '10.100.0.0/16'
       ]
     }
+    dhcpOptions:{
+      dnsServers:[
+        dnsPrivateIp
+      ]
+    }
     subnets: [
       {
         name: 'SharedServices'
@@ -119,6 +131,11 @@ resource vnetBranch1 'Microsoft.Network/virtualNetworks@2020-08-01' = {
     addressSpace: {
       addressPrefixes: [
         '10.200.0.0/16'
+      ]
+    }
+    dhcpOptions:{
+      dnsServers:[
+        dnsPrivateIp
       ]
     }
     subnets: [
@@ -251,7 +268,7 @@ module hqdcvm './ad-dc.bicep' = {
     subnetName: 'SharedServices'
     domainName: domainName
     location: locationHQ
-    privateIPAddress: '10.100.0.4'
+    privateIPAddress: dnsPrivateIp
     virtualMachineName: 'vm-hq-dc'
   }
 }

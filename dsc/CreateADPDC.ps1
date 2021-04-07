@@ -8,11 +8,13 @@ configuration CreateADPDC
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$Admincreds,
 
+        [Bool]$CreateForest = $true,
+
         [Int]$RetryCount=20,
         [Int]$RetryIntervalSec=30
     ) 
     
-    Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, PSDesiredStateConfiguration, xPendingReboot
+    Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, xDnsServer, PSDesiredStateConfiguration, xPendingReboot
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
     $Interface=Get-NetAdapter|Where Name -Like "Ethernet*"|Select-Object -First 1
     $InterfaceAlias=$($Interface.Name)
@@ -48,7 +50,7 @@ configuration CreateADPDC
             DependsOn = "[WindowsFeature]DNS"
 	    }
 
-        xDnsServerAddress DnsServerAddress 
+        xDnsServerAddress DnsServerAddr
         { 
             Address        = '127.0.0.1' 
             InterfaceAlias = $InterfaceAlias
@@ -56,15 +58,21 @@ configuration CreateADPDC
 	        DependsOn = "[WindowsFeature]DNS"
         }
 
+        xDnsServerForwarder DnsForwarder
+        {
+            IsSingleInstance = 'Yes'
+            IPAddresses = '168.63. 129.16'
+        }
+
         xWaitforDisk Disk2
         {
-            DiskNumber = 2
+            DiskId = 2
             RetryIntervalSec =$RetryIntervalSec
             RetryCount = $RetryCount
         }
 
         xDisk ADDataDisk {
-            DiskNumber = 2
+            DiskId = 2
             DriveLetter = "F"
             DependsOn = "[xWaitForDisk]Disk2"
         }

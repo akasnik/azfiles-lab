@@ -76,9 +76,24 @@ configuration CreateFS
             
             Script configShare
             {
+                DependsOn = "[cChocoPackageInstaller]installGit"
                 SetScript = {
-                    cd $using:ShareFolder 2>&1 | Out-Null
-                    git clone $using:GitRepo 2>&1 | Out-Null
+                    if (Test-Path $using:ShareFolder)
+                    {
+                        git clone -C $using:ShareFolder $using:GitRepo | Out-Null
+                    }
+                    else
+                    {
+                        Start-Sleep -s 60
+                        if (Test-Path $using:ShareFolder)
+                        {
+                            git clone -C $using:ShareFolder $using:GitRepo | Out-Null
+                        }
+                        else
+                        {
+                            Write-Error "Share path $using:ShareFolder is not available."
+                        }
+                    }
                 }
                 GetScript = {
                     @{Result = Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}}
@@ -86,7 +101,6 @@ configuration CreateFS
                 TestScript = {
                     if (Test-Path $using:ShareFolder)  {((Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}) -gt 0)} else {$false}
                 }
-                DependsOn = "[cChocoPackageInstaller]installGit"
             }
         }
    }
