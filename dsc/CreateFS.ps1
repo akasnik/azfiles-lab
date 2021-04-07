@@ -94,7 +94,8 @@ configuration CreateFS
             {
                 DependsOn = "[cChocoPackageInstaller]installEdge"
                 SetScript = {
-                    git -C $using:ShareFolder clone $using:GitRepo | Out-Null
+                    #git -C $using:ShareFolder clone $using:GitRepo | Out-Null
+                    $out = Invoke-Command -ScriptBlock {git -C $using:ShareFolder clone $using:GitRepo 2>&1}
                 }
                 GetScript = {
                     @{Result = Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}}

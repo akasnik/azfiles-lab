@@ -830,8 +830,9 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "Name": "[parameters('domainName')]",
-                  "User": "[format('{0}@{1}', parameters('adminUsername'), parameters('domainName'))]",
-                  "Restart": true
+                  "User": "[parameters('adminUsername')]",
+                  "Restart": true,
+                  "Options": 3
                 },
                 "protectedSettings": {
                   "Password": "[parameters('adminPassword')]"
@@ -1101,8 +1102,9 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "Name": "[parameters('domainName')]",
-                  "User": "[format('{0}@{1}', parameters('adminUsername'), parameters('domainName'))]",
-                  "Restart": true
+                  "User": "[parameters('adminUsername')]",
+                  "Restart": true,
+                  "Options": 3
                 },
                 "protectedSettings": {
                   "Password": "[parameters('adminPassword')]"
@@ -1131,7 +1133,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.3.126.58533",
-      "templateHash": "12786719166851394359"
+      "templateHash": "3252978277192243967"
     }
   }
 }

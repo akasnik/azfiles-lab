@@ -147,9 +147,10 @@ resource vm_domainJoin 'Microsoft.Compute/virtualMachines/extensions@2015-06-15'
     settings: {
       Name: domainName
       //OUPath: ouPath
-      User: '${adminUsername}@${domainName}'
+      //User: '${adminUsername}@${domainName}'
+      User: adminUsername
       Restart: true
-      //Options: 3
+      Options: 3
     }
     protectedSettings: {
       Password: adminPassword
