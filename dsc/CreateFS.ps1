@@ -94,22 +94,7 @@ configuration CreateFS
             {
                 DependsOn = "[cChocoPackageInstaller]installEdge"
                 SetScript = {
-                    if (Test-Path $using:ShareFolder)
-                    {
-                        git clone -C $using:ShareFolder $using:GitRepo | Out-Null
-                    }
-                    else
-                    {
-                        Start-Sleep -s 60
-                        if (Test-Path $using:ShareFolder)
-                        {
-                            git -C $using:ShareFolder clone $using:GitRepo | Out-Null
-                        }
-                        else
-                        {
-                            Write-Error "Share path $using:ShareFolder is not available."
-                        }
-                    }
+                    git -C $using:ShareFolder clone $using:GitRepo | Out-Null
                 }
                 GetScript = {
                     @{Result = Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}}
