@@ -109,33 +109,68 @@ configuration CreateADPDC
 	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
         }
         
-        xADUser 'Contoso\ExampleUser1'
+        xADUser 'MarketingUser1'
         {
             Ensure     = 'Present'
-            UserName   = 'ExampleUser1'
+            UserName   = 'MarketingUser1'
             Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
         }
 
-        xADUser 'Contoso\ExampleUser2'
+        xADUser 'MarketingUser2'
         {
             Ensure     = 'Present'
-            UserName   = 'ExampleUser2'
+            UserName   = 'MarketingUser2'
             Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
         }
 
-        xADGroup 'ExampleGroup'
+        xADGroup 'MarketingGroup'
         {
-            GroupName   = 'ExampleGroup'
+            GroupName   = 'Marketing'
             Ensure      = 'Present'
             MembershipAttribute = 'DistinguishedName'
             MembersToInclude             = @(
-                'CN=ExampleUser1,CN=Users,DC=contoso,DC=com'
-                'CN=ExampleUser2,CN=Users,DC=contoso,DC=com'
+                'CN=MarketingUser1,CN=Users,DC=contoso,DC=com'
+                'CN=MarketingUser2,CN=Users,DC=contoso,DC=com'
             )
+            DependsOn = @('[xADUser]MarketingUser1','[xADUser]MarketingUser2')
+        }
+
+        xADUser 'SalesUser1'
+        {
+            Ensure     = 'Present'
+            UserName   = 'SalesUser1'
+            Password   = $DomainCreds
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
+        }
+
+        xADUser 'SalesUser2'
+        {
+            Ensure     = 'Present'
+            UserName   = 'SalesUser2'
+            Password   = $DomainCreds
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
+        }
+
+        xADGroup 'SalesGroup'
+        {
+            GroupName   = 'Sales'
+            Ensure      = 'Present'
+            MembershipAttribute = 'DistinguishedName'
+            MembersToInclude             = @(
+                'CN=SalesUser1,CN=Users,DC=contoso,DC=com'
+                'CN=SalesUser2,CN=Users,DC=contoso,DC=com'
+            )
+            DependsOn = @('[xADUser]SalesUser1','[xADUser]SalesUser2')
         }
    }
 } 

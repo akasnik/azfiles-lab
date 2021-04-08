@@ -48,10 +48,25 @@ configuration CreateFS
             DependsOn = "[xWaitForDisk]Disk2"
         }
 
+        Script waitForDiskBug
+        {
+            DependsOn = '[xDisk]DataDisk'
+            SetScript = {
+                
+            }
+            GetScript = {
+                @{Result = $true}
+            }
+            TestScript = {
+                Get-PSDrive -PSProvider FileSystem | Out-Null
+                $true
+            }
+        }
+
         cChocoInstaller installChoco
         {
             InstallDir = "c:\choco"
-            DependsOn = "[xDisk]DataDisk"
+            DependsOn = "[Script]waitForDiskBug"
         }
         
         cChocoPackageInstaller installGit
@@ -83,7 +98,7 @@ configuration CreateFS
                 Ensure = "Present"
                 Type = "Directory"
                 DestinationPath = $ShareFolder
-                DependsOn = "[xDisk]DataDisk"
+                DependsOn = "[Script]waitForDiskBug"
             }
 
             SmbShare Share1 {
@@ -191,7 +206,41 @@ configuration CreateFS
                         NoPropagateInherit = $false
                     }
                 )
-                DependsOn = @('[File]TemplateFolder', '[Script]configShare')
+                DependsOn = @('[File]TemplateFolder', '[Script]configShare', '[File]MarketingFile3', '[File]SalesFile3')
+            }
+
+            cNtfsPermissionEntry PermissionSetMarketing
+            {
+                Ensure = 'Present'
+                Path = "$ShareFolder\Marketing"
+                Principal = 'CONTOSO\Marketing'
+                AccessControlInformation = @(
+                    cNtfsAccessControlInformation
+                    {
+                        AccessControlType = 'Allow'
+                        FileSystemRights = 'FullControl'
+                        Inheritance = 'ThisFolderSubfoldersAndFiles'
+                        NoPropagateInherit = $false
+                    }
+                )
+                DependsOn = @('[File]TemplateFolder', '[Script]configShare', '[File]MarketingFile3')
+            }
+            
+            cNtfsPermissionEntry PermissionSetSales
+            {
+                Ensure = 'Present'
+                Path = "$ShareFolder\Sales"
+                Principal = 'CONTOSO\Sales'
+                AccessControlInformation = @(
+                    cNtfsAccessControlInformation
+                    {
+                        AccessControlType = 'Allow'
+                        FileSystemRights = 'FullControl'
+                        Inheritance = 'ThisFolderSubfoldersAndFiles'
+                        NoPropagateInherit = $false
+                    }
+                )
+                DependsOn = @('[File]TemplateFolder', '[Script]configShare', '[File]SalesFile3')
             }
         }
    }
