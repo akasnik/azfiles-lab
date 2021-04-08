@@ -1,46 +1,82 @@
-# Azure Files Lab HackOn
+# Azure Files MicroHack (bicep)
 
 ## Introduction
-The IoT Hack of the Century will take you on a whirlwind tour in the world of IoT and how it is being used in the modern world of mineral extraction in exotic locations like the Arctic and the wilds of South Africa.
+
+The Azure Files MicroHack walks through the setup of Azure Files in an hybrid environment with Azure File Sync and related features (TBC - add AD integration etc.)
 
 ## Learning Objectives
-In this hack you will be solving the common business problem that companies in the mineral extraction industry face and how IoT solutions from Azure are brought to bare
+We often see new customers onboarding to Azure Files or looking to run PoC to validate the service, try file server migration, tools, approach, etc. struggle with deployment and look for lab environment to play around the setup and tools. Azure Files MicroHack helps by providing an automated lab environment (using bicep) to mimic an on-prem environment with DC, File Servers (with Branch Site), DFS-N, dummy data and a hybrid setup with Azure (TBC)
 
-1. Provision an IoT Hub
-2. Set up an IoT Edge device
-3. Bring Azure Sphere to your solution for scale and resiliency 
+1. Provision an on-premise environment (automated with DSC, bicep)
+2. Set up Azure Files and File Sync service
+3. Sync files data
+4. Config Private Endpoint
+5. Enable on-premises AD DS Auth
+TBC - to be reviewed updated based on lab scenario around AD integration, feasibility etc.
+
+TBC - diagram of the final environment setup
 
 ## Challenges
-1. Challenge 0: **[Prepare your workstation for IoT development](Student/Challenge-00.md)**
-   - Get yourself ready to develop your IoT solution
-2. Challenge 1: **[Provision an IoT environment](Student/Challenge-01.md)**
-   - Create an IoT Hub and run tests to ensure it can ingest telemetry
-3. Challenge 2: **[Your First Device](Student/Challenge-02.md)**
-   - Make the connection to your Edge device and see that it is properly provisioned.
-4. Challenge 3: **[Connecting the World](Student/Challenge-03.md)**
-   - Connect your device and make sure it can see all other devices in your team.
-5. Challenge 4: **[Scalable Monitoring of Telemetry](Student/Challenge-04.md)**
-   - Figure out the scale problem in the world of IoT. How do you hand trillions of data points of telemetry?
+1. Challenge 0: **[Deploy lab bicep/arm template](Student/Challenge-00.md)**
+   - Deploy the base environment for the lab using Azure subscription. 
+2. Challenge 1: **[Setup Azure Files and File Sync Service](Student/Challenge-01.md)**
+   - Create Azure Files share, setup and config Storage Sync Service.
+3. Challenge 2: **[Configure Server endpoint and Cloud tiering](Student/Challenge-02.md)**
+   - Config HQ File Server endpoint and setup cloud tiering.
+4. Challenge 3: **[Add Branch File Server as a new server endpoint](Student/Challenge-03.md)**
+   - Config Branch File Server to replicate/sync the files from Azure Files.
+5. Challenge 4: **[Enable Data Protection - Snapshot or Azure Backup](Student/Challenge-04.md)**
+   - Review soft delete feature, manage snapshots, and configure Azure Backup.
+6. Challenge 5: **[Secure Azure File Share with Private Endpoint](Student/Challenge-04.md)**
+   - Configure storage firewall and enable private endpoint for secure access to Azure file share.
 
 ## Prerequisites
 - Your own Azure subscription with Owner access
 - Visual Studio Code
-- Azure CLI
-- An AVNET X231 device
+- Az PowerShell Module
 
-## Repository Contents (Optional)
-- `../Coach/Guides`
-  - Coach's Guide and related files
-- `../SteamShovel`
-  - Image files and code for steam shovel microservice
-- `../images`
-  - Generic image files needed
-- `../Student/Guides`
-  - Student's Challenge Guide
+## Challenge 0: Deploy lab bicep/arm template
+
+### Deploy the base environment for the lab using Azure subscription. 
+
+
+
+## Challenge 1: Setup Azure Files and File Sync Service
+   
+### Create Azure Files share, setup and config Storage Sync Service.
+
+
+
+## Challenge 2: Configure Server endpoint and Cloud tiering
+
+### Config HQ File Server endpoint and setup cloud tiering.
+
+
+
+## Challenge 3: Add Branch File Server as a new server endpoint
+
+### Config Branch File Server to replicate/sync the files from Azure Files.
+
+
+
+## Challenge 4: Enable Data Protection - Snapshot or Azure Backup
+
+### Review soft delete feature, manage snapshots, and configure Azure Backup.
+
+
+
+
+## Challenge 5: Secure Azure File Share with Private Endpoint
+
+### Configure storage firewall and enable private endpoint for secure access to Azure file share.
+
+
+
+
+
+## Delete your lab
+- When you are finished or you want to redeploy the lab, delete the resource group "rg-afs-lab"
 
 ## Contributors
-- Peter Laudati
-- Gino Filicetti
-- Jane Q. Public
-- Joe T. Muppet
-
+- Andrej Kasnik
+- Jithin P P
