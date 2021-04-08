@@ -131,7 +131,11 @@ configuration CreateADPDC
         {
             GroupName   = 'ExampleGroup'
             Ensure      = 'Present'
-            MembersToInclude = 'ExampleUser1@contoso.com, ExampleUser2@contoso.com'
+            MembershipAttribute = 'DistinguishedName'
+            MembersToInclude             = @(
+                'CN=ExampleUser1,CN=Users,DC=contoso,DC=com'
+                'CN=ExampleUser2,CN=Users,DC=contoso,DC=com'
+            )
         }
    }
 } 
