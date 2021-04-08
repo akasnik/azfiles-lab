@@ -191,7 +191,7 @@ configuration CreateFS
                         NoPropagateInherit = $false
                     }
                 )
-                DependsOn = '[File]TemplateFolder'
+                DependsOn = @('[File]TemplateFolder', '[Script]configShare')
             }
         }
    }
