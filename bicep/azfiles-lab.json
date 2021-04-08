@@ -657,26 +657,26 @@
             "adminUsername": {
               "type": "string",
               "metadata": {
-                "description": "The name of the administrator account of the new VM and domain"
+                "description": "The name of the administrator account of the new VM and domain join credentials"
               }
             },
             "adminPassword": {
               "type": "secureString",
               "metadata": {
-                "description": "The password for the administrator account of the new VM and domain"
+                "description": "The password for the administrator account of the new VM and domain join credentials"
               }
             },
             "domainName": {
               "type": "string",
               "metadata": {
-                "description": "The FQDN of the Active Directory Domain to be created"
+                "description": "The FQDN of the Active Directory Domain to join"
               }
             },
             "vmSize": {
               "type": "string",
               "defaultValue": "Standard_D2ds_v4",
               "metadata": {
-                "description": "Size of the VM for the controller"
+                "description": "Size of the VM"
               }
             },
             "location": {
@@ -929,26 +929,26 @@
             "adminUsername": {
               "type": "string",
               "metadata": {
-                "description": "The name of the administrator account of the new VM and domain"
+                "description": "The name of the administrator account of the new VM and domain join credentials"
               }
             },
             "adminPassword": {
               "type": "secureString",
               "metadata": {
-                "description": "The password for the administrator account of the new VM and domain"
+                "description": "The password for the administrator account of the new VM and domain join credentials"
               }
             },
             "domainName": {
               "type": "string",
               "metadata": {
-                "description": "The FQDN of the Active Directory Domain to be created"
+                "description": "The FQDN of the Active Directory Domain to join"
               }
             },
             "vmSize": {
               "type": "string",
               "defaultValue": "Standard_D2ds_v4",
               "metadata": {
-                "description": "Size of the VM for the controller"
+                "description": "Size of the VM"
               }
             },
             "location": {
@@ -1198,26 +1198,26 @@
             "adminUsername": {
               "type": "string",
               "metadata": {
-                "description": "The name of the administrator account of the new VM and domain"
+                "description": "The name of the administrator account of the new VM and domain join credentials"
               }
             },
             "adminPassword": {
               "type": "secureString",
               "metadata": {
-                "description": "The password for the administrator account of the new VM and domain"
+                "description": "The password for the administrator account of the new VM and domain join credentials"
               }
             },
             "domainName": {
               "type": "string",
               "metadata": {
-                "description": "The FQDN of the Active Directory Domain to be created"
+                "description": "The FQDN of the Active Directory Domain to join"
               }
             },
             "vmSize": {
               "type": "string",
               "defaultValue": "Standard_B2ms",
               "metadata": {
-                "description": "Size of the VM for the controller"
+                "description": "Size of the VM"
               }
             },
             "location": {
@@ -1424,19 +1424,19 @@
             "adminUsername": {
               "type": "string",
               "metadata": {
-                "description": "The name of the administrator account of the new VM and domain"
+                "description": "The name of the administrator account of the new VM and domain join credentials"
               }
             },
             "adminPassword": {
               "type": "secureString",
               "metadata": {
-                "description": "The password for the administrator account of the new VM and domain"
+                "description": "The password for the administrator account of the new VM and domain join credentials"
               }
             },
             "domainName": {
               "type": "string",
               "metadata": {
-                "description": "The FQDN of the Active Directory Domain to be created"
+                "description": "The FQDN of the Active Directory Domain to join"
               }
             },
             "vmSize": {
@@ -1640,7 +1640,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.3.126.58533",
-      "templateHash": "6280764462079471288"
+      "templateHash": "12312635122737477341"
     }
   }
 }

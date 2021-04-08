@@ -18,7 +18,9 @@ configuration CreateFS
         [Int]$RetryIntervalSec=30
     ) 
     
-    Import-DscResource -ModuleName xStorage, PSDesiredStateConfiguration, xPendingReboot, ComputerManagementDsc, cChoco
+    Import-DscResource -ModuleName xStorage, PSDesiredStateConfiguration, xPendingReboot, ComputerManagementDsc, cChoco, cNtfsAccessControl
+
+    $templateFolder = "$ShareFolder\IT"
     
     Node localhost
     {
@@ -88,6 +90,14 @@ configuration CreateFS
                 Name = $ShareName
                 Path = $ShareFolder
                 DependsOn = "[File]ShareFolder"
+                ReadAccess = @('Everyone')
+            }
+
+            File TemplateFolder {
+                Ensure = "Present"
+                Type = "Directory"
+                DestinationPath = $templateFolder
+                DependsOn = "[File]ShareFolder"
             }
             
             Script configShare
@@ -95,14 +105,93 @@ configuration CreateFS
                 DependsOn = @('[cChocoPackageInstaller]installGit', '[File]ShareFolder')
                 SetScript = {
                     #git -C $using:ShareFolder clone $using:GitRepo | Out-Null
-                    $out = Invoke-Command -ScriptBlock {git -C $using:ShareFolder clone $using:GitRepo 2>&1}
+                    $out = Invoke-Command -ScriptBlock {git -C $using:templateFolder clone $using:GitRepo 2>&1}
                 }
                 GetScript = {
-                    @{Result = Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}}
+                    @{Result = Get-ChildItem $using:templateFolder | Measure-Object | %{$_.Count}}
                 }
                 TestScript = {
-                    if (Test-Path $using:ShareFolder)  {((Get-ChildItem $using:ShareFolder | Measure-Object | %{$_.Count}) -gt 0)} else {$false}
+                    if (Test-Path $using:templateFolder)  {((Get-ChildItem $using:templateFolder | Measure-Object | %{$_.Count}) -gt 0)} else {$false}
                 }
+            }
+
+            File MarketingFolder {
+                Ensure = "Present"
+                Type = "Directory"
+                DestinationPath = "$ShareFolder\Marketing"
+                DependsOn = "[Script]configShare"
+            }
+
+            File SalesFolder {
+                Ensure = "Present"
+                Type = "Directory"
+                DestinationPath = "$ShareFolder\Sales"
+                DependsOn = "[Script]configShare"
+            }
+
+            File MarketingFile1 {
+                Ensure = "Present"
+                Type = "File"
+                DestinationPath = "$ShareFolder\Marketing\marketingData1.txt"
+                Contents = "Sample marketing data text..."
+                DependsOn = "[File]MarketingFolder"
+            }
+
+            File MarketingFile2 {
+                Ensure = "Present"
+                Type = "File"
+                DestinationPath = "$ShareFolder\Marketing\marketingData2.txt"
+                Contents = "Sample marketing data text..."
+                DependsOn = "[File]MarketingFolder"
+            }
+
+            File MarketingFile3 {
+                Ensure = "Present"
+                Type = "File"
+                DestinationPath = "$ShareFolder\Marketing\marketingData3.txt"
+                Contents = "Sample marketing data text..."
+                DependsOn = "[File]MarketingFolder"
+            }
+
+            File SalesFile1 {
+                Ensure = "Present"
+                Type = "File"
+                DestinationPath = "$ShareFolder\Sales\salesData1.txt"
+                Contents = "Sample sales data text..."
+                DependsOn = "[File]SalesFolder"
+            }
+
+            File SalesFile2 {
+                Ensure = "Present"
+                Type = "File"
+                DestinationPath = "$ShareFolder\Sales\salesData2.txt"
+                Contents = "Sample sales data text..."
+                DependsOn = "[File]SalesFolder"
+            }
+
+            File SalesFile3 {
+                Ensure = "Present"
+                Type = "File"
+                DestinationPath = "$ShareFolder\Sales\salesData3.txt"
+                Contents = "Sample sales data text..."
+                DependsOn = "[File]SalesFolder"
+            }
+
+            cNtfsPermissionEntry PermissionSetIT
+            {
+                Ensure = 'Present'
+                Path = "$ShareFolder\IT"
+                Principal = 'BUILTIN\Users'
+                AccessControlInformation = @(
+                    cNtfsAccessControlInformation
+                    {
+                        AccessControlType = 'Allow'
+                        FileSystemRights = 'FullControl'
+                        Inheritance = 'ThisFolderSubfoldersAndFiles'
+                        NoPropagateInherit = $false
+                    }
+                )
+                DependsOn = '[File]TemplateFolder'
             }
         }
    }

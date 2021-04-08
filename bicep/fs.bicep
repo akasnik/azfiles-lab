@@ -1,14 +1,14 @@
-@description('The name of the administrator account of the new VM and domain')
+@description('The name of the administrator account of the new VM and domain join credentials')
 param adminUsername string
 
-@description('The password for the administrator account of the new VM and domain')
+@description('The password for the administrator account of the new VM and domain join credentials')
 @secure()
 param adminPassword string 
 
-@description('The FQDN of the Active Directory Domain to be created')
+@description('The FQDN of the Active Directory Domain to join')
 param domainName string
 
-@description('Size of the VM for the controller')
+@description('Size of the VM')
 param vmSize string = 'Standard_D2ds_v4'
 
 @description('Location for all resources.')

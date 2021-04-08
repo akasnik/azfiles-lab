@@ -107,7 +107,31 @@ configuration CreateADPDC
             LogPath = "F:\NTDS"
             SysvolPath = "F:\SYSVOL"
 	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
-        } 
+        }
+        
+        xADUser 'Contoso\ExampleUser1'
+        {
+            Ensure     = 'Present'
+            UserName   = 'ExampleUser1'
+            Password   = 'Pass@word!'
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+        }
 
+        xADUser 'Contoso\ExampleUser2'
+        {
+            Ensure     = 'Present'
+            UserName   = 'ExampleUser2'
+            Password   = 'Pass@word!'
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+        }
+
+        xADGroup 'ExampleGroup'
+        {
+            GroupName   = 'ExampleGroup'
+            Ensure      = 'Present'
+            MembersToInclude = 'ExampleUser1, ExampleUser2'
+        }
    }
 } 
