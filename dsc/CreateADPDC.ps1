@@ -11,12 +11,7 @@ configuration CreateADPDC
         [Bool]$CreateForest = $true,
 
         [Int]$RetryCount=20,
-        [Int]$RetryIntervalSec=30,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
-        $UserPassword = $Admincreds
+        [Int]$RetryIntervalSec=30
     ) 
     
     Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, xDnsServer, PSDesiredStateConfiguration, xPendingReboot
@@ -118,7 +113,7 @@ configuration CreateADPDC
         {
             Ensure     = 'Present'
             UserName   = 'ExampleUser1'
-            Password   = $UserPassword
+            Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
         }
@@ -127,7 +122,7 @@ configuration CreateADPDC
         {
             Ensure     = 'Present'
             UserName   = 'ExampleUser2'
-            Password   = $UserPassword
+            Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
         }
