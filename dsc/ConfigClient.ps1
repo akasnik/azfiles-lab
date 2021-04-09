@@ -17,18 +17,10 @@ configuration ConfigClient
 
     Node localhost
     {
-        Group AddMarketingToLocalAdminGroup {
+        Group AddGroupsToLocalAdminGroup {
             GroupName='Administrators'
             Ensure= 'Present'
-            MembersToInclude= "$domain\Marketing"
-            Credential = $dCredential
-            PsDscRunAsCredential = $DCredential
-        }
-
-        Group AddSalesToLocalAdminGroup {
-            GroupName='Administrators'
-            Ensure= 'Present'
-            MembersToInclude= "$domain\Sales"
+            MembersToInclude= @("$domain\Marketing", "$domain\Sales")
             Credential = $dCredential
             PsDscRunAsCredential = $DCredential
         }
