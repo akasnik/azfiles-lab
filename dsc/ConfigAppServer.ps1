@@ -61,7 +61,7 @@ configuration ConfigAppServer
 
         cChocoPackageInstaller installAzPS
         {
-            Name        = "azurepowershell"
+            Name        = "az.powershell"
             DependsOn   = "[cChocoPackageInstaller]installAzCLI"
             #This will automatically try to upgrade if available, only if a version is not explicitly specified.
             AutoUpgrade = $True
