@@ -1,4 +1,4 @@
-configuration CreateADPDC 
+configuration ConfigClient 
 { 
    param 
    ( 
