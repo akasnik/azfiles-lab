@@ -101,6 +101,12 @@ configuration CreateFS
             AutoUpgrade = $True
         }
 
+        IEEnhancedSecurityConfiguration disableIEESC
+        {
+            Role = 'Administrators'
+            Enabled = $False
+        }
+
         if ($DeployShare) {
             File ShareFolder {
                 Ensure = "Present"

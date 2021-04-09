@@ -75,5 +75,11 @@ configuration ConfigAppServer
             AutoUpgrade = $True
         }
 
+        IEEnhancedSecurityConfiguration disableIEESC
+        {
+            Role = 'Administrators'
+            Enabled = $False
+        }
+
    }
 } 
