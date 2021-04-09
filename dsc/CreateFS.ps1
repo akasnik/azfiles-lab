@@ -84,11 +84,19 @@ configuration CreateFS
             #This will automatically try to upgrade if available, only if a version is not explicitly specified.
             AutoUpgrade = $True
         }
+
+        cChocoPackageInstaller installAzPS
+        {
+            Name        = "azurepowershell"
+            DependsOn   = "[cChocoPackageInstaller]installAzCLI"
+            #This will automatically try to upgrade if available, only if a version is not explicitly specified.
+            AutoUpgrade = $True
+        }
         
         cChocoPackageInstaller installEdge
         {
             Name        = "choco install microsoft-edge"
-            DependsOn   = "[cChocoPackageInstaller]installAzCLI"
+            DependsOn   = "[cChocoPackageInstaller]installAzPS"
             #This will automatically try to upgrade if available, only if a version is not explicitly specified.
             AutoUpgrade = $True
         }
@@ -105,7 +113,7 @@ configuration CreateFS
                 Name = $ShareName
                 Path = $ShareFolder
                 DependsOn = "[File]ShareFolder"
-                ReadAccess = @('Everyone')
+                FullAccess = @('Everyone')
             }
 
             File TemplateFolder {
