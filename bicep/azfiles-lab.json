@@ -1337,6 +1337,38 @@
             },
             {
               "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/ConfigClient', parameters('virtualMachineName'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.19",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "ModulesUrl": "[uri(parameters('artifactsLocation'), format('ConfigClient.zip{0}', parameters('artifactsLocationSasToken')))]",
+                  "ConfigurationFunction": "ConfigClient.ps1\\ConfigClient",
+                  "Properties": {
+                    "DomainName": "[parameters('domainName')]",
+                    "AdminCreds": {
+                      "UserName": "[parameters('adminUsername')]",
+                      "Password": "PrivateSettingsRef:AdminPassword"
+                    }
+                  }
+                },
+                "protectedSettings": {
+                  "Items": {
+                    "AdminPassword": "[parameters('adminPassword')]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/joindomain', parameters('virtualMachineName')), '/')[0], split(format('{0}/joindomain', parameters('virtualMachineName')), '/')[1])]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
               "apiVersion": "2015-06-15",
               "name": "[format('{0}/joindomain', parameters('virtualMachineName'))]",
               "location": "[parameters('location')]",
@@ -1443,7 +1475,7 @@
               "type": "string",
               "defaultValue": "Standard_D2ds_v4",
               "metadata": {
-                "description": "Size of the VM for the controller"
+                "description": "Size of the VM"
               }
             },
             "location": {
@@ -1640,7 +1672,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.3.126.58533",
-      "templateHash": "12312635122737477341"
+      "templateHash": "10864680487154133333"
     }
   }
 }

@@ -92,8 +92,8 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   }
 }
 
-/*resource vm_createFileShare 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
-  name: '${vm.name}/CreateFileShare'
+resource vm_configClient 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
+  name: '${vm.name}/ConfigClient'
   location: location
   properties: {
     publisher: 'Microsoft.Powershell'
@@ -101,15 +101,26 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
     typeHandlerVersion: '2.19'
     autoUpgradeMinorVersion: true
     settings: {
-      ModulesUrl: uri(artifactsLocation, 'CreateFS.zip${artifactsLocationSasToken}')
-      ConfigurationFunction: 'CreateFS.ps1\\CreateFS'
-      Properties: {}
+      ModulesUrl: uri(artifactsLocation, 'ConfigClient.zip${artifactsLocationSasToken}')
+      ConfigurationFunction: 'ConfigClient.ps1\\ConfigClient'
+      Properties: {        
+        DomainName: domainName
+        AdminCreds: {
+          UserName: adminUsername
+          Password: 'PrivateSettingsRef:AdminPassword'
+        }
+      }
+    }
+    protectedSettings: {
+      Items: {
+        AdminPassword: adminPassword
+      }
     }
   }
   dependsOn: [
     vm_domainJoin
   ]
-}*/
+}
 
 resource vm_domainJoin 'Microsoft.Compute/virtualMachines/extensions@2015-06-15' = {
   name: '${vm.name}/joindomain'
