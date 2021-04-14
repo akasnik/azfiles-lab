@@ -14,7 +14,7 @@ We often see new customers onboarding to Azure Files or looking to run PoC to va
 5. Enable on-premises AD DS Auth
 TBC - to be reviewed updated based on lab scenario around AD integration, feasibility etc.
 
-:::image type="content" source="./media/1-architecture-diagram.png" alt-text="Architecture diagram illustrating an environment for Azure Files lab." border="false":::
+![Architecture diagram illustrating an environment for Azure Files lab](./media/1-architecture-diagram.png)
 
 ## Challenges
 1. Challenge 0: **[Deploy lab using template](bicep/)**
