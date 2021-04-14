@@ -14,7 +14,7 @@ We often see new customers onboarding to Azure Files or looking to run PoC to va
 5. Enable on-premises AD DS Auth
 TBC - to be reviewed updated based on lab scenario around AD integration, feasibility etc.
 
-TBC - diagram of the final environment setup
+:::image type="content" source="./media/1-architecture-diagram.png" alt-text="Architecture diagram illustrating an environment for Azure Files lab." border="false":::
 
 ## Challenges
 1. Challenge 0: **[Deploy lab using template](bicep/)**
@@ -46,8 +46,22 @@ Deploy the base environment for the lab using the bicep/arm template in your Azu
     - Virtual Network (vnet-azhub)
 - Azure Bastion
 
-### Deploy template using VS Code
-Steps to be added by @Andrej
+### Deploy lab template using templates
+
+Steps to deploy Azure Files lab environment:
+
+1. Replicate this GitHub repository to computer with latest Azure Powershell module or Azure CLI
+1. Login to your Azure subscription using PowerShell or Azure CLI
+    - AZ CLI: az login
+1. Create resource group in Azure where lab environment will be deployed
+    - AZ CLI:  az group create -n  'rg-lab-afs'
+    - PowerShell:
+1. (Optional) Modify parameter values within ./bicep/azfiles-lab.parameters.json file
+1. Create resource group in Azure where lab environment will be deployed
+    - AZ CLI:  az deployment group create -g 'rg-lab-afs' -f ..\bicep\azfiles-lab.json --parameters ..\bicep\azfiles-lab.parameters.json
+    - Powershell:
+1. Type password to be used for all accounts (including domain admin) in your lab environment. Be sure to remember that password as you will need it to log into lab environment.
+1. Wait for deployment to finish, it should take around 30 minutes for deployment to finish.
 
 ### Validate Lab
 Steps to check connectivity and validate DSC has done the required configurations for the base lab to start with.
