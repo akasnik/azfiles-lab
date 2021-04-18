@@ -109,7 +109,7 @@ Create HQ File Server endpoint and configure cloud tiering.
     - Server endpoint config:
         - Registered Server: vm-hq-fs-1.contoso.com
         - Path: F:\Share1
-        - **[Cloud Tiering](https://docs.microsoft.com/en-us/azure/storage/files/storage-sync-cloud-tiering-overview**): Disabled
+        - **[Cloud Tiering](https://docs.microsoft.com/en-us/azure/storage/files/storage-sync-cloud-tiering-overview)**: Disabled
         - Initial Download: Recall the namespace first (default option).
         - For more info refer **[Sync policies that affect cloud tiering](https://docs.microsoft.com/en-us/azure/storage/files/storage-sync-cloud-tiering-overview#sync-policies-that-affect-cloud-tiering)**.
         - **[Offline Data Transfer](https://docs.microsoft.com/en-us/azure/storage/files/storage-sync-offline-data-transfer)**: Disabled
@@ -145,7 +145,7 @@ Config Branch File Server (no file shares) to replicate/sync the files from Azur
     - Server endpoint config:
         - Registered Server: vm-branch1-fs-1.contoso.com
         - Path: F:\HQ-BR_Share
-        - **[Cloud Tiering](https://docs.microsoft.com/en-us/azure/storage/files/storage-sync-cloud-tiering-overview**): Enabled
+        - **[Cloud Tiering](https://docs.microsoft.com/en-us/azure/storage/files/storage-sync-cloud-tiering-overview)**: Enabled
             - Volume Free Space Policy: 20 (default)
             - Date Policy: Enabled, 7 days
         - Initial Download: Recall the namespace only
