@@ -63,7 +63,7 @@ Steps to deploy Azure Files lab environment:
     - PowerShell: New-AzResourceGroup -Name 'rg-lab-afs' -Location 'westeurope'
 4. (Optional) Modify parameter values within "./bicep/azfiles-lab.parameters.json" file if required.
 5. Initiate template deployment.
-    - Switch to the ..\bicep\ folder. 
+    - Switch to the .\bicep\ folder. 
     - AZ CLI:  az deployment group create -g 'rg-lab-afs' -f .\azfiles-lab.json --parameters .\azfiles-lab.parameters.json
     - Powershell: New-AzResourceGroupDeployment -Name AzFilesLab -ResourceGroupName 'rg-lab-afs' -TemplateFile .\azfiles-lab.json -TemplateParameterFile .\azfiles-lab.parameters.json
 6. Type password to be used for all accounts (including domain admin) in your lab environment. Be sure to remember that password as you will need it to log into the lab environment.
@@ -72,7 +72,8 @@ Steps to deploy Azure Files lab environment:
 ### Validate Lab
 Steps to check connectivity and validate whether DSC has completed the required configurations for the base lab to start with various challenges (exercises) below.
 
-1. Connect to all VMs using Bastion.
+1. Connect to all VMs using Bastion.  
+*Note: if you haven't changed deployment parameters, default administrator username will be 'azadmin'; use the password that you entered as parameter at the start of deployment; default domain name is 'contoso.com')*
 2. Validate Domain Controller, check Computers OU objects - make sure all machines are domain joined.
 3. Connect to HQ File Server, validate F:\Share1 exist with some dummy folder and files.
 4. Connect to HQ-Client-1, open elevated command prompt or powershell and run below command to map the file share to a local M: drive on the VM.
