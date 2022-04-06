@@ -77,7 +77,7 @@ Steps to check connectivity and validate whether DSC has completed the required 
 2. Validate Domain Controller, check Computers OU objects - make sure all machines are domain joined.
 3. Connect to HQ File Server, validate F:\Share1 exist with some dummy folder and files.
 4. Connect to HQ-Client-1, open elevated command prompt or powershell and run below command to map the file share to a local M: drive on the VM.
-    - net use M: \\vm-hq-fs-1\Share1 /persistent:Yes
+    - net use M: \\\\vm-hq-fs-1\Share1 /persistent:Yes
 5. Edge browser is deployed on servers for internet access/file downloads.
 
 ## Challenge 1: Setup Azure Files and File Sync Service
