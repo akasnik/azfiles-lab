@@ -26,24 +26,13 @@ configuration CreateADPDC
             RebootNodeIfNeeded = $true
         }
 
-	    WindowsFeature DNS 
+        WindowsFeature DNS 
         { 
             Ensure = "Present" 
             Name = "DNS"		
         }
 
-        Script EnableDNSDiags
-	    {
-      	    SetScript = { 
-		        Set-DnsServerDiagnostics -All $true
-                Write-Verbose -Verbose "Enabling DNS client diagnostics" 
-            }
-            GetScript =  { @{} }
-            TestScript = { $false }
-	        DependsOn = "[WindowsFeature]DNS"
-        }
-
-	    WindowsFeature DnsTools
+        WindowsFeature DnsTools
 	    {
 	        Ensure = "Present"
             Name = "RSAT-DNS-Server"
@@ -98,79 +87,5 @@ configuration CreateADPDC
             DependsOn = "[WindowsFeature]ADDSInstall"
         }
          
-        xADDomain FirstDS 
-        {
-            DomainName = $DomainName
-            DomainAdministratorCredential = $DomainCreds
-            SafemodeAdministratorPassword = $DomainCreds
-            DatabasePath = "F:\NTDS"
-            LogPath = "F:\NTDS"
-            SysvolPath = "F:\SYSVOL"
-	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
-        }
-        
-        xADUser 'MarketingUser1'
-        {
-            Ensure     = 'Present'
-            UserName   = 'MarketingUser1'
-            Password   = $DomainCreds
-            DomainName = 'contoso.com'
-            Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
-        }
-
-        xADUser 'MarketingUser2'
-        {
-            Ensure     = 'Present'
-            UserName   = 'MarketingUser2'
-            Password   = $DomainCreds
-            DomainName = 'contoso.com'
-            Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
-        }
-
-        xADGroup 'MarketingGroup'
-        {
-            GroupName   = 'Marketing'
-            Ensure      = 'Present'
-            MembershipAttribute = 'DistinguishedName'
-            MembersToInclude             = @(
-                'CN=MarketingUser1,CN=Users,DC=contoso,DC=com'
-                'CN=MarketingUser2,CN=Users,DC=contoso,DC=com'
-            )
-            DependsOn = @('[xADUser]MarketingUser1','[xADUser]MarketingUser2')
-        }
-
-        xADUser 'SalesUser1'
-        {
-            Ensure     = 'Present'
-            UserName   = 'SalesUser1'
-            Password   = $DomainCreds
-            DomainName = 'contoso.com'
-            Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
-        }
-
-        xADUser 'SalesUser2'
-        {
-            Ensure     = 'Present'
-            UserName   = 'SalesUser2'
-            Password   = $DomainCreds
-            DomainName = 'contoso.com'
-            Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
-        }
-
-        xADGroup 'SalesGroup'
-        {
-            GroupName   = 'Sales'
-            Ensure      = 'Present'
-            MembershipAttribute = 'DistinguishedName'
-            MembersToInclude             = @(
-                'CN=SalesUser1,CN=Users,DC=contoso,DC=com'
-                'CN=SalesUser2,CN=Users,DC=contoso,DC=com'
-            )
-            DependsOn = @('[xADUser]SalesUser1','[xADUser]SalesUser2')
-        }
    }
 } 

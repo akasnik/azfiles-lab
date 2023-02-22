@@ -34,9 +34,6 @@
         },
         "artifactsLocationSasToken": {
             "value": ""
-        },
-        "bastionHQName": {
-            "value": "bastion-hq"
         }
     }
 }
