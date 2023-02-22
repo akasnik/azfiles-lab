@@ -65,7 +65,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-08-01' = {
   }
 }
 
-resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-01' = {
+resource virtualMachine 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: virtualMachineName
   location: location
   properties: {
@@ -127,8 +127,21 @@ resource publicIPAddressName 'Microsoft.Network/publicIPAddresses@2020-08-01' = 
   }
 }
 
+resource setScript 'Microsoft.Compute/virtualMachines/runCommands@2021-07-01' = {
+  name: 'RunCommand'
+  location: location
+  parent: virtualMachine
+  properties: {
+    asyncExecution: false
+    source: {
+      script: 'Set-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\WindowsAzureGuestAgent" -Name DependOnService -Type MultiString -Value DNS'
+    }
+  timeoutInSeconds: 30
+  }
+}
+
 resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
-  name: '${virtualMachineName_resource.name}/CreateADForest'
+  name: '${virtualMachine.name}/CreateADForest'
   location: location
   properties: {
     publisher: 'Microsoft.Powershell'
@@ -152,6 +165,9 @@ resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/ex
       }
     }
   }
+  dependsOn: [
+    setScript
+  ]
 }
 
 output dnsIpAddress string = privateIPAddress
