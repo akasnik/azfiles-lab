@@ -96,6 +96,69 @@ configuration CreateADPDC
             SysvolPath = "F:\SYSVOL"
 	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
         }
-         
-   }
-} 
+
+        ADUser 'MarketingUser1'
+        {
+            Ensure     = 'Present'
+            UserName   = 'MarketingUser1'
+            Password   = $DomainCreds
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
+        }
+
+        ADUser 'MarketingUser2'
+        {
+            Ensure     = 'Present'
+            UserName   = 'MarketingUser2'
+            Password   = $DomainCreds
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
+        }
+
+        ADGroup 'MarketingGroup'
+        {
+            GroupName   = 'Marketing'
+            Ensure      = 'Present'
+            MembershipAttribute = 'DistinguishedName'
+            MembersToInclude             = @(
+                'CN=MarketingUser1,CN=Users,DC=contoso,DC=com'
+                'CN=MarketingUser2,CN=Users,DC=contoso,DC=com'
+            )
+            DependsOn = @('[xADUser]MarketingUser1','[xADUser]MarketingUser2')
+        }
+
+        ADUser 'SalesUser1'
+        {
+            Ensure     = 'Present'
+            UserName   = 'SalesUser1'
+            Password   = $DomainCreds
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
+        }
+
+        ADUser 'SalesUser2'
+        {
+            Ensure     = 'Present'
+            UserName   = 'SalesUser2'
+            Password   = $DomainCreds
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
+            DependsOn = '[xADDomain]FirstDS'
+        }
+
+        ADGroup 'SalesGroup'
+        {
+            GroupName   = 'Sales'
+            Ensure      = 'Present'
+            MembershipAttribute = 'DistinguishedName'
+            MembersToInclude             = @(
+                'CN=SalesUser1,CN=Users,DC=contoso,DC=com'
+                'CN=SalesUser2,CN=Users,DC=contoso,DC=com'
+            )
+            DependsOn = @('[xADUser]SalesUser1','[xADUser]SalesUser2')
+        }
+  }
+}
