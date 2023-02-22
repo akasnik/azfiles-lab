@@ -14,7 +14,7 @@ configuration CreateADPDC
         [Int]$RetryIntervalSec=30
     ) 
     
-    Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, xDnsServer, PSDesiredStateConfiguration, xPendingReboot
+    Import-DscResource -ModuleName ActiveDirectoryDsc, xStorage, xNetworking, xDnsServer, PSDesiredStateConfiguration, xPendingReboot
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
     $Interface=Get-NetAdapter|Where Name -Like "Ethernet*"|Select-Object -First 1
     $InterfaceAlias=$($Interface.Name)
@@ -87,10 +87,10 @@ configuration CreateADPDC
             DependsOn = "[WindowsFeature]ADDSInstall"
         }
 
-        xADDomain FirstDS 
+        ADDomain FirstDS 
         {
             DomainName = $DomainName
-            DomainAdministratorCredential = $DomainCreds
+            Credential = $DomainCreds
             SafemodeAdministratorPassword = $DomainCreds
             DatabasePath = "F:\NTDS"
             LogPath = "F:\NTDS"
