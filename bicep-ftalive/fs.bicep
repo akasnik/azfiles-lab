@@ -1,21 +1,21 @@
-@description('The name of the administrator account of the new VM and domain')
+@description('The name of the administrator account of the new VM and domain join credentials')
 param adminUsername string
 
-@description('The password for the administrator account of the new VM and domain')
+@description('The password for the administrator account of the new VM and domain join credentials')
 @secure()
 param adminPassword string 
 
-@description('The FQDN of the Active Directory Domain to be created')
+@description('The FQDN of the Active Directory Domain to join')
 param domainName string
 
-@description('Size of the VM for the controller')
+@description('Size of the VM')
 param vmSize string = 'Standard_D2ds_v4'
 
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
 @description('Virtual machine name.')
-param virtualMachineName string = 'vm-hq-dc'
+param virtualMachineName string = 'vm-hq-fs-2'
 
 @description('The name of the virtualNetwork.')
 param virtualNetworkName string
@@ -24,10 +24,7 @@ param virtualNetworkName string
 param subnetName string
 
 @description('Private IP address.')
-param privateIPAddress string = '10.100.0.4'
-
-@description('Use Azure DNS on NIC config.')
-param useAzureDNS bool = true
+param privateIPAddress string = '10.100.0.5'
 
 @description('The location of resources, such as DSC modules, that the template depends on')
 param artifactsLocation string = 'https://github.com/akasnik/azfiles-lab/raw/main/dsc/'
@@ -36,7 +33,11 @@ param artifactsLocation string = 'https://github.com/akasnik/azfiles-lab/raw/mai
 @secure()
 param artifactsLocationSasToken string = ''
 
+param deployShare bool = true
+
 var networkInterfaceName = '${virtualMachineName}-nic'
+
+var configureFileShareScript = ''
 
 resource nic 'Microsoft.Network/networkInterfaces@2020-08-01' = {
   name: networkInterfaceName
@@ -54,15 +55,10 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-08-01' = {
         }
       }
     ]
-    dnsSettings:{
-      dnsServers:[
-        '168.63.129.16'
-      ]
-    }
   }
 }
 
-resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-01' = {
+resource vm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: virtualMachineName
   location: location
   properties: {
@@ -94,7 +90,7 @@ resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-
           name: '${virtualMachineName}_DataDisk'
           caching: 'ReadWrite'
           createOption: 'Empty'
-          diskSizeGB: 20
+          diskSizeGB: 128
           managedDisk: {
             storageAccountType: 'StandardSSD_LRS'
           }
@@ -112,8 +108,8 @@ resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-
   }
 }
 
-resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2022-11-01' = {
-  name: '${virtualMachineName_resource.name}/CreateADForest'
+resource vm_createFileShare 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
+  name: '${vm.name}/CreateFileShare'
   location: location
   properties: {
     publisher: 'Microsoft.Powershell'
@@ -121,23 +117,68 @@ resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/ex
     typeHandlerVersion: '2.19'
     autoUpgradeMinorVersion: true
     settings: {
-      ModulesUrl: uri(artifactsLocation, 'CreateADPDC.zip${artifactsLocationSasToken}')
-      ConfigurationFunction: 'CreateADPDC.ps1\\CreateADPDC'
+      ModulesUrl: uri(artifactsLocation, 'CreateFS.zip${artifactsLocationSasToken}')
+      ConfigurationFunction: 'CreateFS.ps1\\CreateFS'
       Properties: {
-        DomainName: domainName
-        AdminCreds: {
-          UserName: adminUsername
-          Password: 'PrivateSettingsRef:AdminPassword'
-        }
+        ShareDriveLetter: 'F'
+        ShareFolder: 'F:\\Share1'
+        ShareName: 'Share1'
+        //GitRepo: 'https://github.com/akasnik/azure-quickstart-templates.git'
+        DeployShare: deployShare
       }
     }
+  }
+  dependsOn: [
+    vm_domainJoin
+  ]
+}
+
+resource vm_domainJoin 'Microsoft.Compute/virtualMachines/extensions@2015-06-15' = {
+  name: '${vm.name}/joindomain'
+  location: location
+  dependsOn: [
+    vm
+  ]
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'JsonADDomainExtension'
+    typeHandlerVersion: '1.3'
+    autoUpgradeMinorVersion: true
+    settings: {
+      Name: domainName
+      //OUPath: ouPath
+      User: '${adminUsername}@${domainName}'
+      //User: adminUsername
+      Restart: true
+      Options: 3
+    }
     protectedSettings: {
-      Items: {
-        AdminPassword: adminPassword
-      }
+      Password: adminPassword
     }
   }
 }
 
+/*
+resource vm_configshare 'Microsoft.Compute/virtualMachines/extensions@2018-06-01' = {
+  name: '${virtualMachineName_resource.name}/config-fileshare'
+  location: location
+  dependsOn: [
+    vm_domainJoin
+  ]
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.10'
+    autoUpgradeMinorVersion: true
+    settings: {
+      timestamp: 123456789
+    }
+    protectedSettings: {
+      commandToExecute: 'powershell.exe ${configureFileShareScript}'
+    }
+  }
+}
+*/
+
+
 output dnsIpAddress string = privateIPAddress
-output domainName string = domainName

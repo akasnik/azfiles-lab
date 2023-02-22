@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "locationAZHub": {
+            "value": "westeurope" 
+        },
+        "vnetAZHubName": {
+            "value": "vnet-azhub"
+        },
+        "locationHQ": {
+            "value": "northeurope"
+        },
+        "vnetHQName": {
+            "value": "vnet-hq"
+        },
+        "locationBranch": {
+            "value": "uksouth"
+        },
+        "vnetBranchName": {
+            "value": "vnet-branch-1"
+        },
+        "adminUsername": {
+            "value": "azadmin"
+        },
+        "domainName": {
+            "value": "contoso.com"
+        },
+        "vmSize": {
+            "value": "Standard_D2ds_v4"
+        },
+        "artifactsLocation": {
+            "value": "https://github.com/akasnik/azfiles-lab/raw/main/dsc/" 
+        },
+        "artifactsLocationSasToken": {
+            "value": ""
+        },
+        "bastionHQName": {
+            "value": "bastion-hq"
+        }
+    }
+}
