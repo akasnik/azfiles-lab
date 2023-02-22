@@ -51,6 +51,9 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-08-01' = {
           subnet: {
             id: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetworkName, subnetName)
           }
+          publicIPAddress: {
+            id: publicIPAddressName.id
+          }
         }
       }
     ]
@@ -112,32 +115,44 @@ resource virtualMachineName_resource 'Microsoft.Compute/virtualMachines@2020-12-
   }
 }
 
-// resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
-//   name: '${virtualMachineName_resource.name}/CreateADForest'
-//   location: location
-//   properties: {
-//     publisher: 'Microsoft.Powershell'
-//     type: 'DSC'
-//     typeHandlerVersion: '2.19'
-//     autoUpgradeMinorVersion: true
-//     settings: {
-//       ModulesUrl: uri(artifactsLocation, 'CreateADPDC.zip${artifactsLocationSasToken}')
-//       ConfigurationFunction: 'CreateADPDC.ps1\\CreateADPDC'
-//       Properties: {
-//         DomainName: domainName
-//         AdminCreds: {
-//           UserName: adminUsername
-//           Password: 'PrivateSettingsRef:AdminPassword'
-//         }
-//       }
-//     }
-//     protectedSettings: {
-//       Items: {
-//         AdminPassword: adminPassword
-//       }
-//     }
-//   }
-// }
+// Deploy Public IP
+resource publicIPAddressName 'Microsoft.Network/publicIPAddresses@2020-08-01' = {
+  name: '${virtualMachineName}-pip'
+  location: location
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Dynamic'
+  }
+}
+
+resource virtualMachineName_CreateADForest 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
+  name: '${virtualMachineName_resource.name}/CreateADForest'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Powershell'
+    type: 'DSC'
+    typeHandlerVersion: '2.77' // Update from 2.19 to 2.77?
+    autoUpgradeMinorVersion: true
+    settings: {
+      ModulesUrl: uri(artifactsLocation, 'CreateADPDC.zip${artifactsLocationSasToken}')
+      ConfigurationFunction: 'CreateADPDC.ps1\\CreateADPDC'
+      Properties: {
+        DomainName: domainName
+        AdminCreds: {
+          UserName: adminUsername
+          Password: 'PrivateSettingsRef:AdminPassword'
+        }
+      }
+    }
+    protectedSettings: {
+      Items: {
+        AdminPassword: adminPassword
+      }
+    }
+  }
+}
 
 output dnsIpAddress string = privateIPAddress
 output domainName string = domainName

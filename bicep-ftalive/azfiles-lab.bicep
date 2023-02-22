@@ -223,40 +223,6 @@ resource peeringAzHubhHQ 'Microsoft.Network/virtualNetworks/virtualNetworkPeerin
   }
 }
 
-// Deploy Bastion
-@description('Name of Bastion for accessing HQ')
-param bastionHQName string = 'bastion-hq'
-
-resource publicIPAddressName 'Microsoft.Network/publicIPAddresses@2020-08-01' = {
-  name: '${bastionHQName}-pip'
-  location: locationHQ
-  sku: {
-    name: 'Standard'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Static'
-  }
-}
-
-resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
-  name: 'bastion-hq'
-  location: locationHQ
-  properties: {
-    ipConfigurations: [
-      {
-        name: 'ipConfig'
-        properties:{
-          subnet:{
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetHQ.name, 'AzureBastionSubnet')
-          }
-          publicIPAddress: {
-            id: publicIPAddressName.id
-          }
-        }
-      }
-    ]
-  }
-}
 
 // Deploy HQ DC VM
 module hqdcvm './ad-dc.bicep' = {
