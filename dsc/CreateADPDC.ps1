@@ -91,7 +91,7 @@ configuration CreateADPDC
         {
             DomainName = $DomainName
             Credential = $DomainCreds
-            SafemodeAdministratorPassword = $DomainCreds
+            SafemodeAdministratorPassword = $Admincreds
             DatabasePath = "F:\NTDS"
             LogPath = "F:\NTDS"
             SysvolPath = "F:\SYSVOL"
