@@ -90,7 +90,7 @@ configuration CreateADPDC
         ADDomain FirstDS 
         {
             DomainName = $DomainName
-            Credential = $DomainCreds
+            Credential = $Admincreds
             SafemodeAdministratorPassword = $Admincreds
             DatabasePath = "F:\NTDS"
             LogPath = "F:\NTDS"
