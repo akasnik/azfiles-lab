@@ -104,7 +104,7 @@ configuration CreateADPDC
             Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
+            DependsOn = '[ADDomain]FirstDS'
         }
 
         ADUser 'MarketingUser2'
@@ -114,7 +114,7 @@ configuration CreateADPDC
             Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
+            DependsOn = '[ADDomain]FirstDS'
         }
 
         ADGroup 'MarketingGroup'
@@ -126,7 +126,7 @@ configuration CreateADPDC
                 'CN=MarketingUser1,CN=Users,DC=contoso,DC=com'
                 'CN=MarketingUser2,CN=Users,DC=contoso,DC=com'
             )
-            DependsOn = @('[xADUser]MarketingUser1','[xADUser]MarketingUser2')
+            DependsOn = @('[ADUser]MarketingUser1','[ADUser]MarketingUser2')
         }
 
         ADUser 'SalesUser1'
@@ -136,7 +136,7 @@ configuration CreateADPDC
             Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
+            DependsOn = '[ADDomain]FirstDS'
         }
 
         ADUser 'SalesUser2'
@@ -146,7 +146,7 @@ configuration CreateADPDC
             Password   = $DomainCreds
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[xADDomain]FirstDS'
+            DependsOn = '[ADDomain]FirstDS'
         }
 
         ADGroup 'SalesGroup'
@@ -158,7 +158,7 @@ configuration CreateADPDC
                 'CN=SalesUser1,CN=Users,DC=contoso,DC=com'
                 'CN=SalesUser2,CN=Users,DC=contoso,DC=com'
             )
-            DependsOn = @('[xADUser]SalesUser1','[xADUser]SalesUser2')
+            DependsOn = @('[ADUser]SalesUser1','[ADUser]SalesUser2')
         }
   }
 }
