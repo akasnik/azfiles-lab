@@ -97,14 +97,23 @@ configuration CreateADPDC
 	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
         }
 
+        ADDomainDefaultPasswordPolicy 'DefaultPasswordPolicy'
+        {
+            DomainName = $DomainName
+            ComplexityEnabled = $ComplexityEnabled
+            MinPasswordLength = $MinPasswordLength
+            DependsOn = '[ADDomain]FirstDS'
+        }
+
         ADUser 'MarketingUser1'
         {
             Ensure     = 'Present'
             UserName   = 'MarketingUser1'
             Password   = $DomainCreds
+            PasswordNeverResets = $true
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[ADDomain]FirstDS'
+            DependsOn = '[ADDomainDefaultPasswordPolicy]DefaultPasswordPolicy'
         }
 
         ADUser 'MarketingUser2'
@@ -112,9 +121,10 @@ configuration CreateADPDC
             Ensure     = 'Present'
             UserName   = 'MarketingUser2'
             Password   = $DomainCreds
+            PasswordNeverResets = $true
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[ADDomain]FirstDS'
+            DependsOn = '[ADDomainDefaultPasswordPolicy]DefaultPasswordPolicy'
         }
 
         ADGroup 'MarketingGroup'
@@ -134,9 +144,10 @@ configuration CreateADPDC
             Ensure     = 'Present'
             UserName   = 'SalesUser1'
             Password   = $DomainCreds
+            PasswordNeverResets = $true
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[ADDomain]FirstDS'
+            DependsOn = '[ADDomainDefaultPasswordPolicy]DefaultPasswordPolicy'
         }
 
         ADUser 'SalesUser2'
@@ -144,9 +155,10 @@ configuration CreateADPDC
             Ensure     = 'Present'
             UserName   = 'SalesUser2'
             Password   = $DomainCreds
+            PasswordNeverResets = $true
             DomainName = 'contoso.com'
             Path       = 'CN=Users,DC=contoso,DC=com'
-            DependsOn = '[ADDomain]FirstDS'
+            DependsOn = '[ADDomainDefaultPasswordPolicy]DefaultPasswordPolicy'
         }
 
         ADGroup 'SalesGroup'
